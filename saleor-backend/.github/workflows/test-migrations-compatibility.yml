@@ -1,0 +1,72 @@
+name: Test migrations compatibility
+
+on:
+  pull_request:
+    branches:
+      - "3.*"
+      - "main"
+    paths:
+      - "**/migrations/**"
+      - .github/workflows/test-migrations-compatibility.yml
+
+env:
+  DATABASE_URL: "postgres://saleor:saleor@postgres:5432/saleor"
+  SECRET_KEY: ci-test
+
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: python:3.12
+
+    permissions:
+      contents: read
+
+    services:
+      postgres:
+        image: library/postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: saleor
+          POSTGRES_USER: saleor
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install system dependencies
+        run: |
+          apt-get install -y libpq-dev
+
+      - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+        with:
+          enable-cache: true
+
+      # Sync dependencies if cache is not hit or there is a partial key match
+      - name: Install dependencies
+        run: |
+          uv sync --locked
+
+      - name: Migrate
+        run: |
+          export DJANGO_SETTINGS_MODULE=saleor.tests.settings
+          uv run python manage.py migrate
+
+      - name: Checkout base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      # Sync dependencies to ensure consistency with base branch
+      - name: Synchronize dependencies
+        run: |
+          uv sync --locked
+
+      - name: Run tests
+        run: |
+          export PYTEST_DB_URL="$DATABASE_URL"
+          uv run pytest -n 0 --reuse-db

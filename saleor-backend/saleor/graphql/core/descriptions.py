@@ -1,0 +1,46 @@
+from graphql import DEFAULT_DEPRECATION_REASON as DEFAULT_DEPRECATION_REASON
+
+from .const import DEFAULT_NESTED_LIST_LIMIT
+
+# Deprecation message for input fields and query arguments. Use it, when
+# deprecation message needs to be included in the field description.
+DEPRECATED_IN_3X_INPUT = "\n\nDEPRECATED: this field will be removed."
+
+DEPRECATED_IN_3X_TYPE = "\n\nDEPRECATED: this type will be removed."
+
+DEPRECATED_IN_3X_EVENT = "\n\nDEPRECATED: this event will be removed."
+
+ADDED_IN_322 = "\n\nAdded in Saleor 3.22."
+ADDED_IN_323 = "\n\nAdded in Saleor 3.23."
+ADDED_IN_324 = "\n\nAdded in Saleor 3.24."
+
+DEPRECATED_EXPORT_MUTATIONS = (
+    "Export functionality is deprecated and will be removed. "
+    "All data can be fetched via the GraphQL API and parsed into the desired format by apps or external tools."
+)
+
+DEPRECATED_EXPORT_MUTATIONS_TYPE_DESCRIPTION = "\n\n" + DEPRECATED_EXPORT_MUTATIONS
+
+DEPRECATED_LEGACY_PAYMENTS = (
+    "The legacy Payments API is deprecated and will be removed. "
+    "Use the Transactions API instead."
+)
+
+DEPRECATED_LEGACY_PAYMENTS_TYPE_DESCRIPTION = "\n\n" + DEPRECATED_LEGACY_PAYMENTS
+
+PREVIEW_FEATURE = (
+    "\n\nNote: this API is currently in Feature Preview and can be subject to "
+    "changes at later point."
+)
+
+CHANNEL_REQUIRED = (
+    "\n\nThis option requires a channel filter to work as the values can vary "
+    "between channels."
+)
+
+RICH_CONTENT = "\n\nRich text format. For reference see https://editorjs.io/"
+
+NESTED_QUERY_LIMIT_DESCRIPTION = (
+    "Maximum number of objects to return. "
+    f"Value must be greater than 0. Default is {DEFAULT_NESTED_LIST_LIMIT}."
+)
