@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: oom-test
+  namespace: resource-lab
+spec:
+  restartPolicy: Always
+  containers:
+    - name: memory-log 
+      image: python:3.12-alpine
+      command:
+        - -python
+        - -c
+        - |
+          data=[]
+          while True:
+            data.append(bytearray(10*1024*1024))
+            print("Allocated approximately",len(data)*10,"MiB",flush=True)
+
+      resources:
+        requests:
+          memory: "32Mi"
+        limits:
+          memory: "64Mi"
+

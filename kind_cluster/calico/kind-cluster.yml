@@ -1,0 +1,21 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    extraPortMappings:
+  - role: worker
+    extraMounts:
+      - hostPath: /home/abdo/Cybersec/DevOps/devops-platform-lab/Project3/worker1
+        containerPath: /var/local-path-provisioner
+  - role: worker
+    extraMounts:
+      - hostPath: /home/abdo/Cybersec/DevOps/devops-platform-lab/Project3/worker2
+        containerPath: /var/local-path-provisioner
+#these two lines in order to use calico as network plugins
+#if you want to use the kubenet -> then hash these two lines
+networking:
+  disableDefaultCNI: true
+  ipFamily: dual
+  podSubnet: 192.168.0.0/16,2001:db8:1::/48                 #this will allow for each node to take it's /64 pool from it + over 65,000 still there for future workers.....
+
+

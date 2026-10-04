@@ -1,0 +1,63 @@
+name: ci-saleor
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*.*.*"
+    paths-ignore:
+      - "kind_cluster/k8s/values.yaml"
+  pull_request:
+    branches:
+      - main
+permissions:
+  contents: read    # good for applying the least privileges rule
+jobs:
+  backend-test:
+    name: Backend tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: saleor
+          POSTGRES_USER: saleor
+          POSTGRES_PASSWORD: AppSecrets
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U saleor -d saleor"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >- 
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      defaults:
+        run: 
+          working-directory: saleor-backend
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        - name: install uv
+          uses: astral-sh/setup-uv@70fe1196a546e49148a73b1c592b2f74c33af80e
+          with:
+            enable-cache: true
+        - name: Set up Python
+          run: uv python install 3.12
+        - name: install dependencies
+          run: uv sync --locked 
+        - name: Run backend tests
+          env:
+           DATABASE_URL: postgres://saleor:AppSecrets@127.0.0.1:5432/saleor
+           REDIS_URL: redis://127.0.0.1:6379/0
+          run: uv run pytest --reuse-db
+
+
+

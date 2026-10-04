@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gate-front
+  namespace: saleor1
+spec:
+
+  podSelector:
+    matchLabels:
+      app: dash
+  policyTypes:
+    - Ingress
+  ingress:
+
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: saleor-gateway-nginx
+        
+      ports:
+        - protocol: TCP
+          port: 80
+

@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: front-api-egress
+  namespace: saleor1
+spec:
+  podSelector:
+    matchLabels:
+      app: dash
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: api
+
+      ports:
+
+        - protocol: TCP
+          port: 8000

@@ -1,0 +1,66 @@
+services:
+  api:
+    build:
+     context: ./saleor
+    ports:
+      - "8000:8000"
+
+    container_name: saleor-api
+    environment:
+
+      DATABASE_URL: postgres://saleor:AppSecrets@database:5432/saleor
+      REDIS_URL: redis://redis:6379/0
+      ALLOWED_HOSTS: localhost,127.0.0.1,api
+      ALLOWED_GRAPHQL_ORIGINS: http://localhost:9000
+      ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL: "false"
+    depends_on:
+      - database
+      - redis
+    restart: unless-stopped
+
+
+  dashboard:
+    build:
+      context: ./saleor-dashboard
+    container_name: saleor-dashboard
+
+    ports:
+      - "9000:80"
+    environment:
+      API_URL: http://localhost:8000/graphql/
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # storefront:
+  #   build:
+  #     context: ./storefront
+  #   container_name: saleor-storefront
+  #   ports:
+  #     - "3000:3000"
+  #
+  #   environment:
+  #     NEXT_PUBLIC_SALEOR_API_URL: http://api:8000/graphql/
+  #   depends_on:
+  #     - api
+  #   restart: unless-stopped
+
+  database:
+    image: postgres:15-alpine
+    container_name: saleor-db
+    environment:
+      POSTGRES_DB: saleor
+      POSTGRES_USER: saleor
+      POSTGRES_PASSWORD: AppSecrets
+    volumes:
+      - saleor-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    container_name: saleor-redis
+    volumes:
+      - saleor-redis-data:/data
+    restart: unless-stopped
+volumes:
+  saleor-db-data:
+  saleor-redis-data:

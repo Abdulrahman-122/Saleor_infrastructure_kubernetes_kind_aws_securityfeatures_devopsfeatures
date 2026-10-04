@@ -1,0 +1,152 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: ngf
+    meta.helm.sh/release-namespace: nginx-gateway
+  creationTimestamp: "2026-09-13T21:41:40Z"
+  generation: 1
+  labels:
+    app.kubernetes.io/instance: ngf
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: nginx-gateway-fabric
+    app.kubernetes.io/version: 2.7.0
+    helm.sh/chart: nginx-gateway-fabric-2.7.0
+  name: ngf-nginx-gateway-fabric
+  namespace: nginx-gateway
+  resourceVersion: "824441"
+  uid: 98226cc5-796b-4e95-9a9c-ddc67388fc60
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: ngf
+      app.kubernetes.io/name: nginx-gateway-fabric
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "9113"
+        prometheus.io/scrape: "true"
+      labels:
+        app.kubernetes.io/instance: ngf
+        app.kubernetes.io/name: nginx-gateway-fabric
+    spec:
+      automountServiceAccountToken: true
+      priorityClassName:  production-api
+      containers:
+      - args:
+        - controller
+        - --gateway-ctlr-name=gateway.nginx.org/nginx-gateway-controller
+        - --gatewayclass=nginx
+        - --config=ngf-config
+        - --service=ngf-nginx-gateway-fabric
+        - --agent-tls-secret=agent-tls
+        - --server-tls-domain=svc
+        - --cluster-domain=cluster.local
+        - --metrics-port=9113
+        - --health-port=8081
+        - --leader-election-lock-name=ngf-nginx-gateway-fabric-leader-election
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_UID
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.uid
+        - name: INSTANCE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.labels['app.kubernetes.io/instance']
+        - name: IMAGE_NAME
+          value: ghcr.io/nginx/nginx-gateway-fabric:2.7.0
+        image: ghcr.io/nginx/nginx-gateway-fabric:2.7.0
+        imagePullPolicy: IfNotPresent
+        name: nginx-gateway
+        ports:
+        - containerPort: 8443
+          name: agent-grpc
+          protocol: TCP
+        - containerPort: 9113
+          name: metrics
+          protocol: TCP
+        - containerPort: 8081
+          name: health
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /readyz
+            port: health
+            scheme: HTTP
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+          runAsGroup: 1001
+          runAsUser: 101
+          seccompProfile:
+            type: RuntimeDefault
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/run/secrets/ngf
+          name: nginx-agent-tls
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        fsGroup: 1001
+        runAsNonRoot: true
+      serviceAccount: ngf-nginx-gateway-fabric
+      serviceAccountName: ngf-nginx-gateway-fabric
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: nginx-agent-tls
+        secret:
+          defaultMode: 420
+          secretName: server-tls
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2026-09-13T21:41:40Z"
+    lastUpdateTime: "2026-09-13T21:41:51Z"
+    message: ReplicaSet "ngf-nginx-gateway-fabric-7ffd57f7" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  - lastTransitionTime: "2026-09-24T07:34:52Z"
+    lastUpdateTime: "2026-09-24T07:34:52Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  observedGeneration: 1
+  readyReplicas: 1
+  replicas: 1
+  terminatingReplicas: 0
+  updatedReplicas: 1

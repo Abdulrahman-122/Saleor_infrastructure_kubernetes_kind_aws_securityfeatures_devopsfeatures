@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: saleor-developer-binding
+  namespace: saleor1
+subjects:
+  - kind: User
+    name: adam
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: saleor-developer
+  apiGroup: rbac.authorization.k8s.io   
+

@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.postgres.name }}
+  namespace: {{ .Values.postgres.ns }}
+spec:
+  serviceName: postgres
+  replicas: {{ .Values.postgres.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.postgres.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.postgres.app }}
+    spec:
+      #securityContext:
+       # seccompProfile:
+        #  type: RuntimeDefault  #allow secure computing mode
+      priorityClassName: critical-workloads
+      containers:
+        - name: postgres
+          image: {{ .Values.postgres.image.repo }}:{{ .Values.postgres.image.tag }}
+          ports:
+            - name: {{ .Values.postgres.ports.name }}
+              containerPort: {{ .Values.postgres.ports.port }}
+        #  securityContext:
+         #   allowPrivilegeEscalation: false
+          #  capabilities:
+          #   drop:
+          #    - ALL
+
+          startupProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command:
+                 - sh
+                 - -c
+                 - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          env:
+            
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgres.env.secret_file }}
+                  key: {{ .Values.postgres.env.key1 }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgres.env.secret_file }}
+                  key: {{ .Values.postgres.env.key2 }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.postgres.env.secret_file }}
+                  key: {{ .Values.postgres.env.key3 }}
+          volumeMounts:
+            - name:  postgres-data
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: {{ .Values.postgres.resources.req.cpu }}
+              memory: {{ .Values.postgres.resources.req.mem }}
+            limits:
+              cpu: {{ .Values.postgres.resources.lim.cpu }}
+              memory: {{ .Values.postgres.resources.lim.mem }}
+
+
+  volumeClaimTemplates:
+    - metadata:
+        name:  postgres-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "my-storage-postgres"
+        resources:
+          requests:  
+            storage: 1Gi

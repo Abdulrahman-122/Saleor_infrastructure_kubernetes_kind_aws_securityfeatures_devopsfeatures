@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cpu-throttle-test
+  namespace: resource-lab
+spec:
+  containers:
+    - name: cpu-throt
+      image: busybox:1.36
+      command:
+        - sh
+        - -c
+        - | 
+          while true; do
+           : 
+          done
+      resources:
+        requests:
+          cpu: "100m"
+        limits:
+          cpu: "100m"
+

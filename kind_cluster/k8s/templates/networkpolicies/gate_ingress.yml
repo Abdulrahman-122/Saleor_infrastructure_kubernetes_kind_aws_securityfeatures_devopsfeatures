@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-ingress
+  namespace: saleor1
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: saleor-gateway-nginx
+
+  policyTypes:
+    - Ingress
+
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 80
+
+# now this networkpolicy is important as here we allow any traffic that came over port 80 to this gateway pod -> to be allowed to pass through it.

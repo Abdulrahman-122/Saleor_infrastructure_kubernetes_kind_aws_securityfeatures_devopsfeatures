@@ -1,0 +1,25 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: saleor-api-vpa
+  namespace: saleor1
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: saleor-api
+  updatePolicy:
+    updateMode: "InPlace"   #once the controller detect changing it will evict the pod and recreate it again(Recreate) but here i am usin: InPlace (so it will apply the changes without any evicting)
+  resourcePolicy:
+    containerPolicies:
+      - containerName: "vpa"
+        minAllowed:
+          cpu: "100m"
+          memory: "128Mi"
+        maxAllowed:
+          cpu: "2"
+          memory: "2Gi"
+        controlledResources:
+          - cpu
+          - memory
+        controlledValues: RequestsAndLimits

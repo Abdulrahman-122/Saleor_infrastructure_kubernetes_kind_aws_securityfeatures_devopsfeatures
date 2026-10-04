@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: saleor-api
+  namespace: saleor1
+automountServiceAccountToken: false
+

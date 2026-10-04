@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: saleor-pod-reader-binding
+  namespace: saleor1
+subjects:
+  - kind: ServiceAccount
+    name: saleor-api
+    namespace: saleor1
+roleRef:
+  kind: ClusterRole
+  name: saleor-pod-reader
+  apiGroup: rbac.authorization.k8s.io

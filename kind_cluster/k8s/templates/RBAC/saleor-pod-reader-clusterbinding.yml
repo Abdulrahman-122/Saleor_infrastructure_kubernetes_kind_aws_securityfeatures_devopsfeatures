@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: saleor-pod-reader-clusterbinding
+subjects:
+  - kind: ServiceAccount
+    name: saleor-api
+    namespace: saleor1
+roleRef:
+  kind: ClusterRole
+  name: saleor-pod-reader
+  apiGroup: rbac.authorization.k8s.io
+#don't use this role as it make the entire cluster privileged for the serviceaccount that uses that cluster.
+#use instead rolebinding as it scoped with namespace while that clusterrolebinding scoped with the entire cluster (take care!!!!!!!!!!!)
+
