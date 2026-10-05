@@ -39,10 +39,10 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-      defaults:
+    defaults:
         run: 
           working-directory: saleor-backend
-      steps:
+    steps:
         - name: Checkout repository
           uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
         - name: install uv

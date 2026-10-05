@@ -31,7 +31,7 @@ services:
     depends_on:
       - api
     restart: unless-stopped
-
+  #in case you would love to add this part of saleor to the project you may need to make an image for this part (in my case i couldn't do that image as i need to study TypeScript more ..)
   # storefront:
   #   build:
   #     context: ./storefront
