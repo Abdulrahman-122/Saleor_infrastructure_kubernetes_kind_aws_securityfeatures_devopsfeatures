@@ -55,11 +55,11 @@ jobs:
           run: uv sync --locked 
         - name: Ruff format check
           run: uv run ruff format .
-        #- name: Run backend tests
-         # env:
-          # DATABASE_URL: postgres://saleor:AppSecrets@127.0.0.1:5432/saleor
-           #REDIS_URL: redis://127.0.0.1:6379/0
-          #run: uv run pytest --reuse-db
+        - name: Run backend tests
+         env:
+          DATABASE_URL: postgres://saleor:AppSecrets@127.0.0.1:5432/saleor
+           REDIS_URL: redis://127.0.0.1:6379/0
+          run: uv run pytest --reuse-db
   dashboard-test:
     name: dashboard-test
     needs:
@@ -81,18 +81,18 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: saleor-dashboard/pnpm-lock.yaml
-      # - name: Install dependencies
-      #   run: pnpm install --frozen-lockfile
-      # - name: Lint
-      #   run: pnpm run lint
-      # - name: Format check
-      #   run: pnpm run format:check
-      # - name: Type check
-      #   run: pnpm run check-types
-      # - name: Run tests
-      #   run: pnpm run test:ci
-      # - name: Build dashboard
-      #   run: pnpm run build 
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm run lint
+      - name: Format check
+        run: pnpm run format:check
+      - name: Type check
+        run: pnpm run check-types
+      - name: Run tests
+        run: pnpm run test:ci
+      - name: Build dashboard
+        run: pnpm run build 
   docker-build:
     name: Build and push docker images.
     needs:
