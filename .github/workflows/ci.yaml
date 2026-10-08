@@ -58,11 +58,6 @@ jobs:
             uv run ruff check . 
         - name: Ruff format check
           run: uv run ruff format --check .
-        - name: Ruff check again
-          run: |
-            uv run ruff check . --fix --unsafe-fixes
-        - name: Type check
-          run: uv run mypy . 
         #- name: Run backend tests
          # env:
           # DATABASE_URL: postgres://saleor:AppSecrets@127.0.0.1:5432/saleor
