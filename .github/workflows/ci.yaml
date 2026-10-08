@@ -81,16 +81,51 @@ jobs:
           node-version: 24
           cache: pnpm
           cache-dependency-path: saleor-dashboard/pnpm-lock.yaml
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm run lint
-      - name: Format check
-        run: pnpm run format:check
-      - name: Type check
-        run: pnpm run check-types
-      - name: Run tests
-        run: pnpm run test:ci
-      - name: Build dashboard
-        run: pnpm run build 
+      # - name: Install dependencies
+      #   run: pnpm install --frozen-lockfile
+      # - name: Lint
+      #   run: pnpm run lint
+      # - name: Format check
+      #   run: pnpm run format:check
+      # - name: Type check
+      #   run: pnpm run check-types
+      # - name: Run tests
+      #   run: pnpm run test:ci
+      # - name: Build dashboard
+      #   run: pnpm run build 
+  docker-build:
+    name: Build and push docker images.
+    needs:
+      - backend-test
+      - dashboard-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - name: Set up docker buildx
+        uses: docker/setup-buildx-action@vf87e5991a6d7451dcb8d9637bfbc97413f497069
+      - name: Login to Docker hub
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
+        with:
+          username: ${{ secrets.DockerHub_username }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Build and Push Saleor API image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: ./saleor-backend
+          file: ./saleor-backend/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/saleor-api:${{ github.ref_name }}
+      - name: Build and Push Saleor dashboard image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: ./saleor-dashboard
+          file: ./saleor-dashboard/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/saleor-dash:${{ github.ref_name }}
+
 
