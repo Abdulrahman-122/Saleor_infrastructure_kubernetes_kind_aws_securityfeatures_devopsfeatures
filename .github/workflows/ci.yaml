@@ -57,7 +57,7 @@ jobs:
           run: uv run ruff format .
         - name: Run backend tests
          env:
-          DATABASE_URL: postgres://saleor:AppSecrets@127.0.0.1:5432/saleor
+           DATABASE_URL: postgres://saleor:AppSecrets@127.0.0.1:5432/saleor
            REDIS_URL: redis://127.0.0.1:6379/0
           run: uv run pytest --reuse-db
   dashboard-test:
