@@ -1,0 +1,54 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: saleor-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: saleor.rules
+      rules:
+        - alert: SaleorPodRestarting
+          expr: |
+            increase(
+              kube_pod_container_status_restarts_total{
+                namespace="saleor1"
+              }[10m]
+            ) > 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Saleor pod is restarting"
+            description: "A Saleor container restarted more than 3 times during the last 10 minutes."
+
+        - alert: SaleorDeploymentUnavailable
+          expr: |
+            kube_deployment_status_replicas_available{
+              namespace="saleor1"
+            }
+            <
+            kube_deployment_spec_replicas{
+              namespace="saleor1"
+            }
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Saleor deployment has unavailable replicas"
+            description: "A Saleor deployment has fewer available replicas than desired."
+        
+        - alert: KubernetesNodeDown
+          expr: |
+            kube_node_status_condition{
+              condition="Ready",
+              status="true"
+            } == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Kubernetes node is not ready"
+            description: "A Kubernetes node has been NotReady for more than 5 minutes."   
+
