@@ -54,9 +54,13 @@ jobs:
         - name: install dependencies
           run: uv sync --locked 
         - name: Ruff check
-          run: uv run ruff check .
+          run: |
+            uv run ruff check . 
         - name: Ruff format check
           run: uv run ruff format --check .
+        - name: Ruff check again
+          run: |
+            uv run ruff check . --fix --unsafe-fixes
         - name: Type check
           run: uv run mypy . 
         #- name: Run backend tests
@@ -66,6 +70,8 @@ jobs:
           #run: uv run pytest --reuse-db
   dashboard-test:
     name: dashboard-test
+    needs:
+      - backend-test
     runs-on: ubuntu-latest
     defaults:
       run: 
