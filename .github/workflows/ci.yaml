@@ -45,8 +45,8 @@ jobs:
     steps:
         - name: Checkout repository
           uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
-        - name: install uv
-          uses: astral-sh/setup-uv@70fe1196a546e49148a73b1c592b2f74c33af80e
+        - name: Install the latest version of uv
+          uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
           with:
             enable-cache: true
         - name: Set up Python
