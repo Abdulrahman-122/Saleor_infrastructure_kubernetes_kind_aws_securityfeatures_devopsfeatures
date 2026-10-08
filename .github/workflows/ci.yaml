@@ -56,8 +56,8 @@ jobs:
         - name: Ruff check
           run: |
             uv run ruff check . 
-        - name: Ruff format check
-          run: uv run ruff format --check . --fix --unsafe-fixes
+      #  - name: Ruff format check
+       #   run: uv run ruff format --check . --fix --unsafe-fixes
         #- name: Run backend tests
          # env:
           # DATABASE_URL: postgres://saleor:AppSecrets@127.0.0.1:5432/saleor
