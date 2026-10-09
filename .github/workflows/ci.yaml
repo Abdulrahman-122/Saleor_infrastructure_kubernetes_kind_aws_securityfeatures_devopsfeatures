@@ -114,16 +114,20 @@ jobs:
         with:
           context: ./saleor-backend
           file: ./saleor-backend/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/saleor-api:${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: Build and Push Saleor dashboard image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
           context: ./saleor-dashboard
           file: ./saleor-dashboard/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/saleor-dash:${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
