@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.api.name }}
+  namespace: {{ .Values.api.ns }}
+spec:
+  replicas: {{ .Values.api.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.api.app }}
+  template:
+
+    metadata:
+      labels:
+        app: {{ .Values.api.app }}
+    spec:
+      serviceAccountName: saleor-api
+      securityContext:
+          runAsGroup: {{ .Values.api.sec.asGroup }}
+          runAsUser: {{ .Values.api.sec.asUser }}
+          seccompProfile:
+            type: RuntimeDefault
+         # appArmorProfile:         
+         #  type: RuntimeDefault
+         # don't try to unhash this untill you make sure your cluster uses apparmor profile and it's enabled in my case it's not enabled so i will not add it but this is another security layer for your cluster on your host machine.
+      priorityClassName: production-api 
+      containers:
+        - name: api-saleor
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: 
+                - ALL 
+            runAsGroup: {{ .Values.api.sec.asGroup }}
+            runAsUser: {{ .Values.api.sec.asUser }}
+            seccompProfile:
+             type: RuntimeDefault
+          image: {{ .Values.api.image.repo }}:{{ .Values.api.image.tag }}
+          imagePullPolicy: Always
+
+          ports:
+            - name: {{ .Values.api.ports.name }}
+              containerPort: {{ .Values.api.ports.port }}
+          startupProbe:
+            httpGet:
+              path: /health/
+              port: {{ .Values.api.ports.port }}
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health/
+              port: {{ .Values.api.ports.port }}
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health/
+              port: {{ .Values.api.ports.port }}
+            periodSeconds: 20
+            failureThreshold: 3
+
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.env.secret_file }}
+                  key: {{ .Values.api.env.secret1_key }}
+            - name: Redis_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.api.env.secret_file }}
+
+                  key: {{.Values.api.env.secret2_key}}
+            - name: ALLOWED_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.api.env.config_file }}
+                  key: {{ .Values.api.env.config1_key }}
+          resources:
+            requests:
+              cpu: {{ .Values.api.resources.requests.cpu }}
+              memory: {{ .Values.api.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.api.resources.limits.cpu }}
+
+              memory: {{ .Values.api.resources.limits.memory }}

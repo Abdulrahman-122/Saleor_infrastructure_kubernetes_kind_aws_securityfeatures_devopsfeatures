@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: resource-lab-large
+  namespace: resource-lab
+spec:
+  containers:
+    - name: app
+      image: nginx:latest
+      resources:
+        requests:
+          memory: "100Gi"

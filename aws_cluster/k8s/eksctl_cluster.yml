@@ -1,0 +1,18 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: saleor-clust
+  region: us-east-1
+  version: "1.36"
+managedNodeGroups:
+  - name: saleor-workers
+    instanceType: m7i-flex.large
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 3
+    privateNetworking: false
+addons:
+  - name: vpc-cni
+  - name: coredns
+  - name: kube-proxy
+  - name: aws-ebs-csi-driver

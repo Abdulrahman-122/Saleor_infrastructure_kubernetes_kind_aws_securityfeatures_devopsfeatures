@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{.Values.api.env.config_file}}
+  namespace: saleor1            # according to docs configs must be in the same namespace
+data:    # i will store data as key-value pair
+  ALLOWED_HOSTS: "*"
+#immutable: true     #this will prevent any changes for these data from the api or any apps connted to it

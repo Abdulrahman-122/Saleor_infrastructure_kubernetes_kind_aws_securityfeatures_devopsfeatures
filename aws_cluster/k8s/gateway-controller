@@ -1,0 +1,2 @@
+helm install ngf \ oci://ghcr.io/nginx/charts/nginx-gateway-fabric \ --create-namespace \ -n nginx-gateway
+# just take the code above and run it in order to build the controller that is mandatory for gateway that you need 

@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Config
+clusters:
+  - name: kind-my-cluster
+    cluster:
+      server: https://127.0.0.1:43839
+      certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJRHJCZnVWYzFNckV3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TmpBNU1qZ3hNVFEwTkRkYUZ3MHpOakE1TWpVeE1UUTVORGRhTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUUMxM3NETTZBbDg2bzdJYndsK2JSQUVKSEtGeEN5MWpFQ3VHdXZ2eG03ZHZDaERodFZUeWNNOHVCTmIKa3dsdVB2MkxIQnZZNTJ1UGRJVlhXenlDMjRCakhoWG9vSzFGeGM1ckxOYy9hdW9HNVNoTlFPU1hvbGdUa3lsaAphbXloWDUzY3VaWFArbkx2bkNFUm0vdjdVcmk0NW8rcWRsUUg1RzZ1RlJSdXNZcEhOMkJJUFdJbWFyN0FkT1VECnJjdzdUM2lpNnYxTlF1NTZpM3h3eUFYNWNMUlJabXZwaVZZQm5iWG5Jeml3VVFlMzBKSlErL1hBc0FDYlhCZlIKQS9GU21kUCtZTy9wMlR4eUMvaEEzVko0dkttc0J6RSs2K2sxVnVHUDV1enAvV2djdTZubXA2OVNNQk9OSUNmaApIRTd5aTQ5NnNKMEJuTUZiYll1azgvbmFLOGhwQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJSS0l4QXVnQkx4K09zdHY0bDQ4amRtSzlpaGJUQVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQlh6SGRQK3BMawpvS2dDL1dGeUdTUDZIaEd0d0dReHJhb21LUnA0Q2ViWGx4N3lTTGRGYmp4b2kwdG42VThTMkoyd1VUOG5sYjJnCktoVDVzY0N2Tmt2QjRURmx1eWJ6aFJyVkg1UmZVTXVMRW5xT2NId3pLeTNtdnJpZkhua2Jhc1F4OXdhVVNWRWoKZTBBK2lqOVl2Vy9wam1FdXAvY0Q3TUhJem1oemZyVWNXVU9aQW1YQnBLblpFNnB1eXZtR3UzWVhyQ3E0NjR2RwpTQkNlbVM1cHRoaTRwaHZ1UDJFdmg5NjZPVWY3enFTdVhXVnM4ZnhLOUlXYVQ2QU5jTE1tVXBtc1dHZ2xaaUhuCmFmY0VDVUNnRW5URm83ekszWHIvOStLc2pad1VxbFhaOEdUbEw1UVk1UURkMEdJZHpDMHNPQkRzdGx6V1VrdzYKTFcxMko4ZXJ5MzA0Ci0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
+users:
+  - name: adam
+    user:
+      exec:
+        apiVersion: client.authentication.k8s.io/v1
+        interactiveMode: Never
+        command: kubectl
+        args:
+          - oidc-login
+          - get-token
+          - --oidc-issuer-url=https://keycloak.local:8443/realms/kubernetes
+          - --oidc-client-id=kubernetes
+          - --oidc-redirect-url=http://127.0.0.1:8000
+          - --listen-address=127.0.0.1:8000
+          - --grant-type=authcode
+          - --certificate-authority=/home/abdo/Cybersec/DevOps/devops-platform-lab/Project3/kind_cluster/k8s/authentic/OIDC/certs/ca.crt
+contexts:
+  - name: adam@kind-my-cluster
+    context:
+      cluster: kind-my-cluster
+      user: adam
+      namespace: saleor1
+
+current-context: adam@kind-my-cluster
+

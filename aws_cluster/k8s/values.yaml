@@ -1,0 +1,110 @@
+
+dash:
+  name: dashboard-deploy
+  ns: saleor1
+  app: dash
+  replicas: 2
+  image:
+    repo: abdulrahmanqasim/saleor-dashboard
+    tag: latest
+  ports:
+    name: http
+    port: 80
+  env:
+    secret_file: dash-secret
+    key1: API_URL
+  
+  resources:
+    req:
+      cpu: 100m
+      mem: 128Mi
+    lim:
+      cpu: 500m
+      mem: 512Mi
+  service:
+    name:  saleor-dashboard
+    type: ClusterIP
+api:
+  name: saleor-api
+  ns: saleor1
+  replicas: 2
+  app: api
+  image:
+    repo: abdulrahmanqasim/saleor-api
+    tag: v1.0.0
+  ports:
+    name: http
+    port: 8000
+  sec:
+    asGroup: 1001
+    asUser: 101
+  env:
+    secret_file: api-secret
+    secret1_key:  DATABASE_URL
+    secret2_key: Redis_URL 
+    config_file: api-config
+    config1_key: ALLOWED_HOSTS
+  resources:
+   requests:
+    cpu: "250m"
+    memory: "512Mi"
+   limits:
+    cpu: "1"
+    memory: "1Gi"
+  service:
+    name: api-service
+    type: ClusterIP
+
+postgres:
+  name: postgres
+  replicas: 1
+  ns: saleor1
+  app: postgres
+  image:
+    repo: postgres
+    tag: 15-alpine
+  ports:
+    name: postgres
+    port: 5432
+  service:
+    name: postgres
+    type: None
+  env:
+    secret_file: postg-secret
+    key1: POSTGRES_DB
+    key2: POSTGRES_USER
+    key3: POSTGRES_PASSWORD
+  resources:
+    req:
+      cpu: 100m
+      mem: 250Mi
+    lim:
+      cpu: 500m
+      mem: 500Mi
+
+redis:
+  name: redis
+  ns: saleor1
+  replicas: 1 
+  app: redis
+  image:
+    repo: redis
+    tag: 7-alpine
+  ports:
+    name: redis-data
+    port: 6379
+  volume: redis-data
+  service:
+    name: redis
+    type: None
+    
+  resources:
+    req:
+      cpu: 100m
+      mem: 100Mi
+    lim:
+      cpu: 200m
+      mem: 200Mi
+
+
+

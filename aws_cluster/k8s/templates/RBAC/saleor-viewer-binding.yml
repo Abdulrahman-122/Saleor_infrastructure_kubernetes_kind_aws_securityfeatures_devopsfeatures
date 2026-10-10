@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: saleor-viewer-binding
+  namespace: saleor1
+subjects:
+  - kind: ServiceAccount
+    name: saleor-viewer
+    namespace: saleor1
+roleRef:
+  kind: Role
+  name: saleor-viewer
+  apiGroup: rbac.authorization.k8s.io

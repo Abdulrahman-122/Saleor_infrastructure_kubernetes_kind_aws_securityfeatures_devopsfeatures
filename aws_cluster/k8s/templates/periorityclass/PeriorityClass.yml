@@ -1,0 +1,35 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: normal-app
+value: 100
+globalDefault: false
+description: "Priority for  normal workloads"
+
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: monitoring
+value: 50000
+globalDefault: false
+description: "Priority for monitoring workloads"
+
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: production-api
+value: 100000
+globalDefault: false
+description: "priority for production Api workloads"
+
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: critical-workloads
+value: 1000000
+globalDefault: false
+description: "priority for critical workloads"
+

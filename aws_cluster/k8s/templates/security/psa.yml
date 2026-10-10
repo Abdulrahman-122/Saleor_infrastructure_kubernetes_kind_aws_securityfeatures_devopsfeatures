@@ -1,0 +1,15 @@
+apiVersion: v1   
+kind: LimitRange   # this range will assign to each resource  in order to  prevent the error of  admission controller that we have built for any resource that doesn't have these resources.
+
+metadata:
+  name: saleor-limits
+  namespace: saleor1
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 650Mi
+      defaultRequest:
+        cpu: 300m
+        memory: 550Mi

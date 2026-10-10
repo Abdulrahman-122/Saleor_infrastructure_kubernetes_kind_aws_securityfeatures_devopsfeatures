@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Values.redis.service.name}}
+  namespace: saleor1
+spec:
+  clusterIP: {{.Values.redis.service.type}}
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies: 
+    - IPv4
+#    - IPv6
+  selector: 
+      app: {{.Values.redis.app}}
+  ports:
+    - name: {{.Values.redis.ports.name}}
+      port:  {{.Values.redis.ports.port}}
+      targetPort: {{.Values.redis.ports.port}}
+
+      
+  

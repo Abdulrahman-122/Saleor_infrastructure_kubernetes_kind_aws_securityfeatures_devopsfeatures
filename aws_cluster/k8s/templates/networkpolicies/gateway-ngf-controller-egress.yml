@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-ngfcont-egress
+  namespace: saleor1
+
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: saleor-gateway-nginx
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: nginx-gateway
+        podSelector:
+          matchLabels:
+               app.kubernetes.io/instance: ngf
+               app.kubernetes.io/name: nginx-gateway-fabric
+     
+      ports:
+        - protocol: TCP
+          port: 8443
+
+
+
+

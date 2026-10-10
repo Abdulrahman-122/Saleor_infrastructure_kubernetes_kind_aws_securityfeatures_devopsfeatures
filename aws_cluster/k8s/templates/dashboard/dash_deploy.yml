@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.dash.name }}
+  namespace: {{ .Values.dash.ns }}
+  labels:
+    app: {{ .Values.dash.app }}
+spec:
+  replicas: {{ .Values.dash.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.dash.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.dash.app }}
+    spec:
+     serviceAccountName: saleor-dashboard 
+
+     #securityContext:
+      # runAsNonRoot: true
+      # runAsGroup: 1001
+       #runAsUser: 101
+       #seccompProfile:
+        # type: RuntimeDefault
+     priorityClassName: normal-app
+     containers:
+       - name: dashboard
+         image: {{ .Values.dash.image.repo }}:{{ .Values.dash.image.tag }}
+         imagePullPolicy: Always
+         #security part is important but you need to relocate the software debendencies so i won't use this part as it need more time (my goal is to understand Kubernetes for now very well)
+         #securityContext:
+          # allowPrivilegeEscalation: false
+           #capabilities:
+            # drop:
+             #- ALL
+       #    runAsGroup: 1001
+        #   runAsUser: 101
+          # seccompProfile:
+           # type: RuntimeDefault
+         ports:
+           - name: {{.Values.dash.ports.name}}
+             containerPort: {{.Values.dash.ports.port}}
+         env:
+
+           - name: API_URL
+             valueFrom:
+               secretKeyRef:
+                 name: {{ .Values.dash.env.secret_file }}
+                 key: {{ .Values.dash.env.key1 }}
+
+
+         resources:
+           requests:
+             cpu: {{ .Values.dash.resources.req.cpu }}
+             memory:  {{ .Values.dash.resources.req.mem }}
+           limits:
+             cpu:  {{ .Values.dash.resources.lim.cpu }}
+             memory:  {{ .Values.dash.resources.lim.mem }}
+            
+
+
+

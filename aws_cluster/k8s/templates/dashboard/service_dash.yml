@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.dash.service.name }}
+  namespace: {{ .Values.dash.ns }}
+spec:
+  type: {{ .Values.dash.service.type }}
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies:
+    - IPv4
+   ## - IPv6
+  selector:
+    app: {{ .Values.dash.app }}
+  ports:
+    - name: {{ .Values.dash.ports.name }}
+      port: {{ .Values.dash.ports.port }}
+      targetPort: {{ .Values.dash.ports.port }}
