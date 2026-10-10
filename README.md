@@ -172,10 +172,204 @@ ETCDCTL_API=3 etcdctl \
 
 5. Build the konnectivity server (in order to apply secure the connection between the server and the agents on every node
 ```
-go to this file i made all the stuff about this there: 
+go to this file i made all the stuff about this there:
 ```
-7. Install metrics-server + VPA(vertical pod autoscaler)
-8. Build the helm release
-9. for aws how to build the cluster on it
+- https://github.com/Abdulrahman-122/Saleor_infrastructure_kubernetes_kind_aws_securityfeatures_devopsfeatures/blob/main/konnectivity-server.md
 
-notes:
+7. Install metrics-server + VPA(vertical pod autoscaler)
+- for metrics server (install this chart and install that metrics-server according to this file) https://artifacthub.io/packages/helm/metrics-server/metrics-server
+- for vpa do the following steps
+  - clone the vpa repo:git clone https://github.com/kubernetes/autoscaler.git
+  - then go to vertical-pod-autoscaler: cd autoscaler/vertical-pod-autoscaler
+  - install vpa: ./hack/vpa-up.sh
+  - now test: kubectl get vpa 
+9. Build the helm release
+  - in case you want to helm install directly : just do => helm install name-of-release . --namespace  any-namespace
+  - in case you need to updrade the helm on a file -> helm upgrade name-of-release   path-of-chart    -f  path-to-file
+
+10. for aws how to build the cluster on it
+```
+go to aws-cluster folder and do the following
+# i will assume you will use the free-eligible tier so i just used the free resources for me
+-> provision the cluster
+# eksctl create cluster cluster-name -f  aws-cluster/k8s/eksctl_cluster.yaml
+#now the cluster will work but some addons maybe not as you didn't associate the proper IAM roles
+in this case:
+Run these commands:
+
+```
+kubectl get nodes -o wide
+```
+
+
+aws eks describe-cluster \
+  --name saleor-clust \
+  --region us-east-1 \
+  --query 'cluster.{Status:status,Version:version}' \
+  --output table
+
+aws eks describe-addon \
+  --cluster-name saleor-clust \
+  --addon-name aws-ebs-csi-driver \
+  --region us-east-1 \
+  --query 'addon.{Status:status,Version:addonVersion,Issues:health.issues}' \
+  --output json
+
+```
+
+First, install the EKS Pod Identity Agent:
+
+```
+eksctl create addon \
+  --cluster saleor-clust \
+  --region us-east-1 \
+  --name eks-pod-identity-agent
+```
+
+If it already exists, inspect it rather than trying to create it again:
+
+```
+aws eks describe-addon \
+  --cluster-name saleor-clust \
+  --addon-name eks-pod-identity-agent \
+  --region us-east-1 \
+  --query 'addon.status' \
+  --output text
+
+aws eks describe-addon \
+  --cluster-name saleor-clust \
+  --addon-name aws-ebs-csi-driver \
+  --region us-east-1 \
+  --query 'addon.{Status:status,Version:addonVersion,Issues:health.issues}' \
+  --output json
+set the role for the nodes
+ROLE_ARN=$(aws eks describe-nodegroup \
+  --cluster-name saleor-clust \
+  --nodegroup-name saleor-workers \
+  --region us-east-1 \
+  --query 'nodegroup.nodeRole' \
+  --output text)
+
+ROLE_NAME="${ROLE_ARN##*/}"
+
+echo "$ROLE_NAME"
+
+aws iam attach-role-policy \
+  --role-name "$ROLE_NAME" \
+  --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy
+
+#restarrt thee ebs controller
+kubectl rollout restart deployment/ebs-csi-controller \
+  -n kube-system
+
+#how to solve the problem of Load balancer on aws
+First check whether your EKS cluster has an OIDC issuer:
+
+```
+aws eks describe-cluster \
+  --name saleor-clust \
+  --region us-east-1 \
+  --query 'cluster.identity.oidc.issuer' \
+  --output text
+```
+
+If it returns a URL, continue to the IAM policy step. If it returns `None`, associate an OIDC provider:
+
+```
+eksctl utils associate-iam-oidc-provider \
+  --cluster saleor-clust \
+  --region us-east-1 \
+  --approve
+```
+
+Next, download the controller's official IAM policy:
+
+```
+curl -o iam_policy.json \
+  https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.14.1/docs/install/iam_policy.json
+```
+
+Check whether you already have this policy:
+
+```
+aws iam list-policies \
+  --scope Local \
+  --query "Policies[?PolicyName=='AWSLoadBalancerControllerIAMPolicy'].Arn" \
+  --output text
+```
+
+If that returns no ARN, create the policy:
+
+```
+aws iam create-policy \
+  --policy-name AWSLoadBalancerControllerIAMPolicy \
+  --policy-document file://iam_policy.json
+```
+
+If it returns an ARN, reuse that ARN rather than creating a duplicate. You can retrieve your AWS account ID with:
+
+```
+aws sts get-caller-identity --query Account --output text
+```
+
+Create the controller's dedicated Kubernetes service account and IAM role, replacing `YOUR_ACCOUNT_ID` with your account ID:
+
+```
+eksctl create iamserviceaccount \
+  --cluster saleor-clust \
+  --region us-east-1 \
+  --namespace kube-system \
+  --name aws-load-balancer-controller \
+  --role-name AmazonEKSLoadBalancerControllerRole \
+  --attach-policy-arn arn:aws:iam::YOUR_ACCOUNT_ID:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve
+```
+
+If this service account already exists, inspect it before rerunning the command; you may need to use `--override-existing-serviceaccounts`.
+
+Install the controller using Helm:
+
+```
+helm repo add eks https://aws.github.io/eks-charts
+helm repo update eks
+
+helm upgrade --install aws-load-balancer-controller \
+  eks/aws-load-balancer-controller \
+  --namespace kube-system \
+  --set clusterName=saleor-clust \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --version 1.14.0
+```
+
+Verify the deployment:
+
+```
+kubectl get deployment aws-load-balancer-controller -n kube-system
+kubectl logs deployment/aws-load-balancer-controller -n kube-system --tail=50
+```
+
+You want the deployment to become available, with its replicas ready.
+
+aws elbv2 describe-load-balancers \
+  --region us-east-1 \
+  --query 'LoadBalancers[].{Name:LoadBalancerName,DNS:DNSName,Scheme:Scheme,Type:Type,State:State.Code}' \
+  --output table
+
+aws elbv2 describe-load-balancers \
+  --region us-east-1 \
+  --query 'LoadBalancers[].{Name:LoadBalancerName,DNS:DNSName,Scheme:Scheme,Type:Type,State:State.Code}' \
+  --output table
+
+
+
+
+
+
+
+
+
+
+
+
+
