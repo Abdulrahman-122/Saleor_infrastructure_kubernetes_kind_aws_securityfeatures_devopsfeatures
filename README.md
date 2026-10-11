@@ -1,5 +1,14 @@
 # Saleor_infrastructure_kubernetes_kind_aws_securityfeatures_devopsfeatures
 - <img width="1197" height="797" alt="image" src="https://github.com/user-attachments/assets/0250acd7-4f64-44d6-b276-b9a0688e8f56" />
+- <img width="1906" height="945" alt="image" src="https://github.com/user-attachments/assets/a5f69df6-581c-468f-8d81-43407093aa05" />
+- <img width="1520" height="800" alt="image" src="https://github.com/user-attachments/assets/3ffda1bf-025c-43bb-a112-b86f2d49d378" />
+- <img width="1527" height="582" alt="image" src="https://github.com/user-attachments/assets/27942643-e1d9-44a4-b0c4-eb4768aff3a8" />
+- <img width="1564" height="780" alt="image" src="https://github.com/user-attachments/assets/9bdc5893-7271-4a74-8f6b-7efc3ebcd90e" />
+- <img width="1589" height="792" alt="image" src="https://github.com/user-attachments/assets/c8643aab-121d-469e-b077-4bf5dd32e693" />
+- <img width="1783" height="842" alt="image" src="https://github.com/user-attachments/assets/b78ddfc1-85f2-44f2-9585-bd91491a11bf" />
+- <img width="1143" height="706" alt="image" src="https://github.com/user-attachments/assets/8337b971-b203-418a-9810-ae4cb6840b67" />
+- <img width="1033" height="761" alt="image" src="https://github.com/user-attachments/assets/17bd9e26-8df4-414a-abd9-0b302ecbd674" />
+- <img width="1110" height="244" alt="image" src="https://github.com/user-attachments/assets/0c2ff6bd-e095-4692-a202-7443e5138d6c" />
 
 # How to build this infrastructure???
 
